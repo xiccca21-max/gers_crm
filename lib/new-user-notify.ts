@@ -15,7 +15,7 @@ export async function newUserNotify(newUser: Users) {
       from: process.env.EMAIL_FROM,
       to: admin.email,
       subject: `New User Registration with PENDING state`,
-      text: `New User Registered: ${newUser.name} \n\n Please login to ${process.env.NEXT_PUBLIC_APP_URL}/admin/users and activate them. \n\n Thank you \n\n ${process.env.NEXT_PUBLIC_APP_NAME}`,
+      text: `New User Registered: ${newUser.name}${newUser.username ? ` (@${newUser.username})` : ""} (${newUser.email})\n\nPlease login to ${process.env.NEXT_PUBLIC_APP_URL}/admin/users and activate them.\n\nThank you\n\n${process.env.NEXT_PUBLIC_APP_NAME}`,
     });
 
     console.log("Email sent to admin");

@@ -290,7 +290,7 @@
       "photo": "Profile Photo",
       "personalInfo": "Personal Information",
       "changePassword": "Пароль",
-      "passwordHelp": "Вход в CRM — по email и паролю на странице «Вход». Смена пароля из профиля пока недоступна.",
+      "passwordHelp": "Вход в CRM — по логину и паролю на странице «Вход». Смена пароля из профиля пока недоступна.",
       "language": "Language",
       "openai": "OpenAI Integration",
       "apiTokens": "API Tokens"

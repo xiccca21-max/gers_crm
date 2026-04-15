@@ -120,8 +120,9 @@ async function main() {
   await upsertByName(prisma.crm_Lead_Types, leadTypesData);
   console.log("Lead Types seeded");
 
-  // Test User for E2E Testing
+  // Test User for E2E Testing (вход по логину + паролю)
   const testUserEmail = process.env.TEST_USER_EMAIL || "test@nextcrm.app";
+  const testUserUsername = process.env.TEST_USER_USERNAME || "testuser";
   await prisma.users.upsert({
     where: { email: testUserEmail },
     update: {
@@ -129,6 +130,8 @@ async function main() {
       is_admin: true,
       is_account_admin: true,
       role: "admin",
+      username: testUserUsername,
+      displayUsername: testUserUsername,
     },
     create: {
       email: testUserEmail,
@@ -137,9 +140,13 @@ async function main() {
       is_admin: true,
       is_account_admin: true,
       role: "admin",
+      username: testUserUsername,
+      displayUsername: testUserUsername,
     },
   });
-  console.log(`Test user seeded: ${testUserEmail}`);
+  console.log(
+    `Test user seeded: email=${testUserEmail} username=${testUserUsername}`
+  );
 
   // Better Auth credential (email + password) for E2E / local sign-in
   const testPasswordPlain =

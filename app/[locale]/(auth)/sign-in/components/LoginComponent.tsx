@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Link } from "@/i18n/navigation";
+import { normalizeLogin } from "@/lib/username-login";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +19,13 @@ import { toast } from "sonner";
 
 export function LoginComponent() {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
 
   const signInWithPassword = async () => {
-    if (!email.trim()) {
-      toast.error("Введите email.");
+    const user = normalizeLogin(login);
+    if (user.length < 3) {
+      toast.error("Введите логин (не короче 3 символов).");
       return;
     }
     if (!password) {
@@ -32,8 +34,8 @@ export function LoginComponent() {
     }
     setIsLoading(true);
     try {
-      const { error } = await authClient.signIn.email({
-        email: email.trim(),
+      const { error } = await authClient.signIn.username({
+        username: user,
         password,
         rememberMe: true,
       });
@@ -54,19 +56,19 @@ export function LoginComponent() {
     <Card className="shadow-lg my-5 w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Вход</CardTitle>
-        <CardDescription>Email и пароль</CardDescription>
+        <CardDescription>Логин и пароль</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="grid gap-1.5">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="login">Логин</Label>
           <Input
-            id="email"
-            type="email"
-            placeholder="name@domain.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="login"
+            type="text"
+            placeholder="ivan_petrov"
+            value={login}
+            onChange={(e) => setLogin(e.target.value)}
             disabled={isLoading}
-            autoComplete="email"
+            autoComplete="username"
             onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
           />
         </div>
@@ -82,7 +84,7 @@ export function LoginComponent() {
             onKeyDown={(e) => e.key === "Enter" && signInWithPassword()}
           />
         </div>
-        <Button onClick={signInWithPassword} disabled={isLoading || !email || !password}>
+        <Button onClick={signInWithPassword} disabled={isLoading || !login.trim() || !password}>
           Войти
         </Button>
         <p className="text-center text-sm text-muted-foreground">

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Link } from "@/i18n/navigation";
+import { internalEmailFromLogin, normalizeLogin } from "@/lib/username-login";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +20,7 @@ import { toast } from "sonner";
 export function RegisterComponent() {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
@@ -28,8 +29,9 @@ export function RegisterComponent() {
       toast.error("Введите имя.");
       return;
     }
-    if (!email.trim()) {
-      toast.error("Введите email.");
+    const user = normalizeLogin(login);
+    if (user.length < 3) {
+      toast.error("Логин не короче 3 символов: латиница, цифры, подчёркивание.");
       return;
     }
     if (password.length < 8) {
@@ -42,10 +44,12 @@ export function RegisterComponent() {
     }
     setIsLoading(true);
     try {
+      const email = internalEmailFromLogin(login);
       const { error } = await authClient.signUp.email({
         name: name.trim(),
-        email: email.trim(),
+        email,
         password,
+        username: user,
       });
       if (error) {
         toast.error(error.message || "Не удалось зарегистрироваться.");
@@ -53,8 +57,9 @@ export function RegisterComponent() {
       }
       toast.success("Аккаунт создан.");
       window.location.href = "/";
-    } catch {
-      toast.error("Ошибка регистрации.");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Ошибка регистрации.";
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +69,7 @@ export function RegisterComponent() {
     <Card className="shadow-lg my-5 w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Регистрация</CardTitle>
-        <CardDescription>Создайте аккаунт с email и паролем</CardDescription>
+        <CardDescription>Имя, логин и пароль — без почты</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="grid gap-1.5">
@@ -80,16 +85,19 @@ export function RegisterComponent() {
           />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="reg-email">Email</Label>
+          <Label htmlFor="reg-login">Логин</Label>
           <Input
-            id="reg-email"
-            type="email"
-            placeholder="name@domain.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="reg-login"
+            type="text"
+            placeholder="ivan_petrov"
+            value={login}
+            onChange={(e) => setLogin(e.target.value)}
             disabled={isLoading}
-            autoComplete="email"
+            autoComplete="username"
           />
+          <p className="text-xs text-muted-foreground">
+            Латинские буквы, цифры и «_», не короче 3 символов после нормализации.
+          </p>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="reg-password">Пароль</Label>

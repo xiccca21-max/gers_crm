@@ -1,16 +1,52 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { admin as adminPlugin } from "better-auth/plugins";
+import { admin as adminPlugin, username as usernamePlugin } from "better-auth/plugins";
 import { prismadb } from "@/lib/prisma";
 import { ac, admin, member, viewer } from "@/lib/auth-permissions";
 import { newUserNotify } from "@/lib/new-user-notify";
 
 const isDemo = process.env.NEXT_PUBLIC_APP_URL === "https://demo.nextcrm.io";
 
+/** Vercel: один деплой открывают с разных host (alias, *.vercel.app). Статический BETTER_AUTH_URL ломает проверку origin/host. */
+function resolveBetterAuthBaseURL():
+  | string
+  | { allowedHosts: string[]; protocol: "https" | "http"; fallback: string } {
+  const fromEnv = process.env.BETTER_AUTH_URL?.replace(/\/+$/, "");
+  const localhost = "http://localhost:3000";
+
+  if (process.env.VERCEL !== "1") {
+    return fromEnv ?? localhost;
+  }
+
+  const hosts = new Set<string>(["*.vercel.app"]);
+  if (fromEnv) {
+    try {
+      const host = new URL(fromEnv).host;
+      if (host) hosts.add(host);
+    } catch {
+      /* ignore */
+    }
+  }
+  for (const part of process.env.BETTER_AUTH_ALLOWED_HOSTS?.split(",") ?? []) {
+    const h = part.trim();
+    if (h) hosts.add(h);
+  }
+
+  const fallback =
+    fromEnv ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : localhost);
+
+  return {
+    allowedHosts: [...hosts],
+    protocol: "https",
+    fallback,
+  };
+}
+
 export const auth = betterAuth({
   database: prismaAdapter(prismadb, { provider: "postgresql" }),
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: resolveBetterAuthBaseURL(),
   advanced: {
     database: {
       generateId: "uuid",
@@ -58,6 +94,10 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    usernamePlugin({
+      minUsernameLength: 3,
+      maxUsernameLength: 32,
+    }),
     adminPlugin({
       ac,
       roles: { admin, member, viewer },
@@ -76,7 +116,11 @@ export const auth = betterAuth({
       } else if (!isDemo) {
         const dbUser = await prismadb.users.findUnique({ where: { id: user.id } });
         if (dbUser) {
-          await newUserNotify(dbUser);
+          try {
+            await newUserNotify(dbUser);
+          } catch {
+            /* уведомление админам не должно отменять создание пользователя */
+          }
         }
       }
     },

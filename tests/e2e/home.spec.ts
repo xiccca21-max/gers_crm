@@ -15,7 +15,7 @@ test.describe("Home Page", () => {
 
     await page.goto("/");
 
-    await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
+    await expect(page.getByLabel("Логин")).toBeVisible();
     await expect(page.getByLabel("Пароль")).toBeVisible();
     await expect(page.getByRole("button", { name: "Войти" })).toBeVisible();
 

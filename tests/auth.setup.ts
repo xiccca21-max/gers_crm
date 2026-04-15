@@ -2,15 +2,15 @@ import { test as setup } from "@playwright/test";
 import path from "path";
 
 const authFile = path.join(__dirname, "../playwright/.auth/user.json");
-const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL || "test@nextcrm.app";
+const TEST_USER_USERNAME = process.env.TEST_USER_USERNAME || "testuser";
 const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD || "TestPassword123456!";
 
 setup("authenticate", async ({ page, context }) => {
   const api = context.request;
 
-  const signInRes = await api.post("/api/auth/sign-in/email", {
+  const signInRes = await api.post("/api/auth/sign-in/username", {
     data: {
-      email: TEST_USER_EMAIL,
+      username: TEST_USER_USERNAME,
       password: TEST_USER_PASSWORD,
       rememberMe: true,
     },

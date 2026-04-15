@@ -108,6 +108,7 @@ services:
 
       # Initial admin user + credential password (see prisma seed).
       TEST_USER_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      TEST_USER_USERNAME: ${TEST_USER_USERNAME:-testuser}
       TEST_USER_PASSWORD: ${TEST_USER_PASSWORD:-TestPassword123456!}
 
       # Placeholder values for optional external services.

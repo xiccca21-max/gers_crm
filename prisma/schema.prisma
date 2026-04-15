@@ -930,7 +930,8 @@ model Users {
   lastLoginAt      DateTime?
   name             String?
   password         String?
-  username         String?
+  username         String?      @unique
+  displayUsername  String?
   userStatus       ActiveStatus @default(PENDING)
   userLanguage     Language     @default(en)
   banned           Boolean      @default(false)

@@ -1,6 +1,6 @@
 # Деплой GERS NextCRM на Vercel
 
-Сборка в CI такая же, как локально: **pnpm** + скрипт `build` (`prisma generate`, `prisma migrate deploy`, `next build`). Переменные окружения задаёшь в **Vercel → Project → Settings → Environment Variables** (Production / Preview по желанию).
+Локально полный `pnpm run build` включает **`prisma migrate deploy`**; на **Vercel** в [`vercel.json`](./vercel.json) используется **`pnpm run vercel-build`** (`prisma generate` + `next build` **без** миграций на билде). Переменные окружения задаёшь в **Vercel → Project → Settings → Environment Variables** (Production / Preview по желанию).
 
 ## 1. Подключение проекта
 
@@ -36,6 +36,7 @@ pnpm prisma migrate deploy
 | `RESEND_API_KEY` | Ключ Resend для **писем админам** о новых пользователях (регистрация). |
 | `EMAIL_FROM` | Адрес отправителя в формате `user@verified-domain.com` (домен верифицирован в Resend). |
 | `NEXTCRM_TOKEN` | Секрет для `Authorization: Bearer …` на вебхуки (`/api/integrations/gers-inquiry` и совместимый эндпоинт лидов). |
+| `BETTER_AUTH_ALLOWED_HOSTS` | Опционально: дополнительные host через запятую (кастомный домен CRM), если не покрывается `BETTER_AUTH_URL` и `*.vercel.app`. |
 
 Дополнительно для форка GERS (рекомендуется в проде):
 
@@ -53,12 +54,14 @@ pnpm prisma migrate deploy
   ```bash
   # Windows PowerShell — подставь строку или: vercel env pull .env.local
   $env:DATABASE_URL = "postgresql://..."
-  # Почта первого админа в сиде — см. prisma/seeds/seed.ts (переменная TEST_USER_EMAIL, иначе test@nextcrm.app)
-  $env:TEST_USER_EMAIL = "you@yourdomain.com"
+  # Первый админ в сиде — см. prisma/seeds/seed.ts
+  $env:TEST_USER_EMAIL = "you@yourdomain.com"   # служебный email в БД (не поле входа)
+  $env:TEST_USER_USERNAME = "admin"               # логин для входа (по умолчанию testuser)
+  $env:TEST_USER_PASSWORD = "YourStrongPasswordHere"
   pnpm prisma db seed
   ```
 
-  Сид заполняет справочники CRM и **upsert**-ит пользователя с `TEST_USER_EMAIL` (роль admin, статус ACTIVE). Задай свою почту до запуска сида, затем войди через OTP на этот адрес.
+  Сид заполняет справочники CRM и **upsert**-ит пользователя (роль admin, статус ACTIVE). Вход на сайте — **логин + пароль** (`TEST_USER_USERNAME` / `TEST_USER_PASSWORD`), не по почте.
 
 ## 4. Хранилище файлов (MinIO / S3)
 
@@ -71,7 +74,7 @@ pnpm prisma migrate deploy
 ## 6. Проверка после деплоя
 
 1. Открой `NEXT_PUBLIC_APP_URL` / `BETTER_AUTH_URL`.
-2. Войди (OTP или Google).
+2. Войди по **логину и паролю** (после сида — `TEST_USER_USERNAME` / `TEST_USER_PASSWORD`) или зарегистрируйся на `/register`.
 3. Проверка вебхука (сервером или `curl`):
 
    `POST https://<твой-домен>/api/integrations/gers-inquiry` с заголовками `Content-Type: application/json` и `Authorization: Bearer <NEXTCRM_TOKEN>`.
