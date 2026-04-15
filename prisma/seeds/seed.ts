@@ -18,11 +18,9 @@ import { seedCurrencies } from "./currencies";
 import { hashPassword } from "better-auth/crypto";
 
 preferIpv4FirstForDbConnections();
-const dbUrl = normalizeServerlessPostgresUrl(process.env.DATABASE_URL!);
+process.env.DATABASE_URL = normalizeServerlessPostgresUrl(process.env.DATABASE_URL!);
 
-const prisma = new PrismaClient({
-  datasources: { db: { url: dbUrl } },
-});
+const prisma = new PrismaClient();
 
 async function upsertByName(
   model: any,

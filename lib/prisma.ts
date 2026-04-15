@@ -12,10 +12,12 @@ declare global {
 const prismaClientSingleton = () => {
   preferIpv4FirstForDbConnections();
   const raw = process.env.DATABASE_URL?.trim();
-  const url = raw ? normalizeServerlessPostgresUrl(raw) : undefined;
+  // Prisma 7: `datasources` в конструкторе PrismaClient не в типах — нормализуем URL в env (как раньше по смыслу).
+  if (raw) {
+    process.env.DATABASE_URL = normalizeServerlessPostgresUrl(raw);
+  }
 
   const client = new PrismaClient({
-    ...(url ? { datasources: { db: { url } } } : {}),
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 
