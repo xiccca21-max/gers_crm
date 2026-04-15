@@ -45,19 +45,26 @@ export function RegisterComponent() {
     setIsLoading(true);
     try {
       const email = internalEmailFromLogin(login);
-      const { error } = await authClient.signUp.email({
+      const { error, data } = await authClient.signUp.email({
         name: name.trim(),
         email,
         password,
         username: user,
       });
       if (error) {
+        console.error("[register] signUp.email failed", {
+          message: error.message,
+          status: (error as { status?: number }).status,
+          code: (error as { code?: string }).code,
+          data,
+        });
         toast.error(error.message || "Не удалось зарегистрироваться.");
         return;
       }
       toast.success("Аккаунт создан.");
       window.location.href = "/";
     } catch (e) {
+      console.error("[register] exception", e);
       const msg = e instanceof Error ? e.message : "Ошибка регистрации.";
       toast.error(msg);
     } finally {

@@ -1,4 +1,75 @@
 import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
+import type { NextRequest } from "next/server";
+import {
+  databaseUrlHint,
+  pingDatabase,
+  redactJsonForLog,
+  shouldPingDbForPath,
+} from "@/lib/auth-route-log";
 
-export const { GET, POST } = toNextJsHandler(auth);
+const { GET: authGET, POST: authPOST } = toNextJsHandler(auth);
+
+export async function GET(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  const t0 = Date.now();
+  try {
+    const res = await authGET(req);
+    const ms = Date.now() - t0;
+    if (!res.ok) {
+      const text = await res.clone().text().catch(() => "");
+      console.warn("[api/auth] GET", res.status, path, `${ms}ms`, "body:", text.slice(0, 800));
+    }
+    return res;
+  } catch (e) {
+    console.error("[api/auth] GET exception", { path, err: e });
+    throw e;
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  const t0 = Date.now();
+  const loud = shouldPingDbForPath(path);
+
+  if (loud) {
+    const hint = databaseUrlHint();
+    const ping = await pingDatabase();
+    if (ping.ok) {
+      console.info("[api/auth] db ping ok", { path, database: hint });
+    } else {
+      console.error("[api/auth] db ping FAILED", {
+        path,
+        database: hint,
+        err: ping.message,
+        hint: "Prisma нужен Postgres URI (postgresql://…), из Supabase: Project Settings → Database — не URL/anon из «Connect» для JS SDK.",
+      });
+    }
+    try {
+      const ct = req.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
+        const raw = await req.clone().text();
+        if (raw) {
+          console.info("[api/auth] POST body (redacted)", path, redactJsonForLog(raw));
+        }
+      }
+    } catch (e) {
+      console.warn("[api/auth] body log skipped", e);
+    }
+  }
+
+  try {
+    const res = await authPOST(req);
+    const ms = Date.now() - t0;
+    if (!res.ok) {
+      const text = await res.clone().text().catch(() => "");
+      console.warn("[api/auth] POST", res.status, path, `${ms}ms`, "response:", text.slice(0, 1500));
+    } else if (loud) {
+      console.info("[api/auth] POST", res.status, path, `${ms}ms`);
+    }
+    return res;
+  } catch (e) {
+    console.error("[api/auth] POST exception", { path, err: e });
+    throw e;
+  }
+}
