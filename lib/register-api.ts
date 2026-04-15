@@ -1,15 +1,18 @@
 /**
- * Прямой POST на Better Auth — чтобы в тост попало тело ответа (JSON или обрезанный HTML),
- * а не пустой error.message из better-fetch.
+ * Регистрация только по логину+паролю в UI. Better Auth с username-плагином всё равно принимает
+ * `POST /sign-up/email` с обязательным полем `email` — передаём внутренний placeholder (`@users.invalid`),
+ * не адрес пользователя.
+ *
+ * Прямой fetch — чтобы в тост попало тело ответа (JSON или обрезанный HTML).
  */
-export async function signUpEmailViaFetch(params: {
+export async function signUpUsernameViaFetch(params: {
   origin: string;
   name: string;
-  email: string;
+  internalPlaceholderEmail: string;
   password: string;
   username: string;
 }): Promise<{ ok: true } | { ok: false; status: number; userMessage: string }> {
-  const { origin, name, email, password, username } = params;
+  const { origin, name, internalPlaceholderEmail: email, password, username } = params;
   const url = `${origin.replace(/\/$/, "")}/api/auth/sign-up/email`;
 
   const res = await fetch(url, {

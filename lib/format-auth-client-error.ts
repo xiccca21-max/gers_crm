@@ -38,7 +38,7 @@ export function formatAuthClientError(error: unknown): string {
     /* ignore */
   }
 
-  return "Сервер отклонил регистрацию без текста ошибки — открой консоль (F12) → вкладка Network → запрос sign-up/email → Response.";
+  return "Сервер отклонил запрос без текста ошибки — открой консоль (F12) → Network → запрос к /api/auth/sign-up/… → Response.";
 }
 
 function pickBody(e: Record<string, unknown>): unknown {

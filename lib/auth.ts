@@ -90,6 +90,9 @@ export const auth = betterAuth({
   secret: resolveBetterAuthSecret(),
   baseURL: resolveBetterAuthBaseURL(),
 
+  /** Вход только по логину (`/sign-in/username`). Регистрация по-прежнему через `/sign-up/email` с внутренним placeholder-email (требование username-плагина Better Auth). */
+  disabledPaths: ["/sign-in/email"],
+
   onAPIError: {
     onError(error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -176,6 +179,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
   },
 
   plugins: [

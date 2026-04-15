@@ -26,6 +26,10 @@ export function normalizeServerlessPostgresUrl(raw: string): string {
     if (!u.searchParams.has("sslmode")) {
       u.searchParams.set("sslmode", "require");
     }
+    // Transaction pooler Supabase (6543 / *.pooler.supabase.com) — Prisma рекомендует pgbouncer=true
+    if (/pooler\.supabase\.com$/i.test(host) && !u.searchParams.has("pgbouncer")) {
+      u.searchParams.set("pgbouncer", "true");
+    }
     return u.toString();
   } catch {
     return trimmed;

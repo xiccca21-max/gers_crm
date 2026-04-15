@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { signUpEmailViaFetch } from "@/lib/register-api";
+import { signUpUsernameViaFetch } from "@/lib/register-api";
 import { internalEmailFromLogin, normalizeLogin } from "@/lib/username-login";
 
 import { Button } from "@/components/ui/button";
@@ -44,12 +44,11 @@ export function RegisterComponent() {
     }
     setIsLoading(true);
     try {
-      const email = internalEmailFromLogin(login);
       const origin = window.location.origin;
-      const result = await signUpEmailViaFetch({
+      const result = await signUpUsernameViaFetch({
         origin,
         name: name.trim(),
-        email,
+        internalPlaceholderEmail: internalEmailFromLogin(login),
         password,
         username: user,
       });

@@ -21,7 +21,7 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "prisma": {
-    "seed": "ts-node ./prisma/seeds/seed.ts"
+    "seed": "npx tsx ./prisma/seeds/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1014.0",
