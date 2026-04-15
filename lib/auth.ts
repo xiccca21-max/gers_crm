@@ -37,7 +37,7 @@ function resolveBetterAuthBaseURL():
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : localhost);
 
   return {
-    allowedHosts: [...hosts],
+    allowedHosts: Array.from(hosts),
     protocol: "https",
     fallback,
   };
