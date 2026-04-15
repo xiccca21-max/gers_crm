@@ -7,6 +7,28 @@ import { newUserNotify } from "@/lib/new-user-notify";
 
 const isDemo = process.env.NEXT_PUBLIC_APP_URL === "https://demo.nextcrm.io";
 
+const BETTER_AUTH_SECRET_PLACEHOLDERS = new Set([
+  "",
+  "build-time-placeholder-secret-replace-at-runtime",
+  "generate-with-openssl-rand-base64-32",
+]);
+
+/** Секрет сессий: на Vercel/проде обязателен свой (≥32), иначе Better Auth падает с «default secret». */
+function resolveBetterAuthSecret(): string {
+  const raw = process.env.BETTER_AUTH_SECRET?.trim();
+  if (raw && !BETTER_AUTH_SECRET_PLACEHOLDERS.has(raw) && raw.length >= 32) {
+    return raw;
+  }
+  const mustConfigure = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+  if (mustConfigure) {
+    throw new Error(
+      "BETTER_AUTH_SECRET: задай в Vercel → Settings → Environment Variables (Production) уникальную строку ≥32 символов " +
+        "(не плейсхолдер из vercel.json / примера). Сгенери: openssl rand -base64 48. Затем Redeploy. См. .env.gers.example."
+    );
+  }
+  return `local-dev-better-auth-${"x".repeat(48)}`;
+}
+
 /** Vercel: один деплой открывают с разных host (alias, *.vercel.app). Статический BETTER_AUTH_URL ломает проверку origin/host. */
 function resolveBetterAuthBaseURL():
   | string
@@ -45,7 +67,7 @@ function resolveBetterAuthBaseURL():
 
 export const auth = betterAuth({
   database: prismaAdapter(prismadb, { provider: "postgresql" }),
-  secret: process.env.BETTER_AUTH_SECRET,
+  secret: resolveBetterAuthSecret(),
   baseURL: resolveBetterAuthBaseURL(),
 
   onAPIError: {
