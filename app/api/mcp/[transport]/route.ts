@@ -44,16 +44,16 @@ const handler = createMcpHandler(
 
 export function GET(
   req: Request,
-  ctx: { params: Promise<{ transport: string }> }
+  _ctx: { params: Promise<{ transport: string }> }
 ) {
   if (isGersSlimUi()) return disabledResponse();
-  return handler(req, ctx);
+  return handler(req);
 }
 
 export function POST(
   req: Request,
-  ctx: { params: Promise<{ transport: string }> }
+  _ctx: { params: Promise<{ transport: string }> }
 ) {
   if (isGersSlimUi()) return disabledResponse();
-  return handler(req, ctx);
+  return handler(req);
 }
