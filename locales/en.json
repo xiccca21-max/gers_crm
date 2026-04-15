@@ -290,6 +290,7 @@
       "photo": "Profile Photo",
       "personalInfo": "Personal Information",
       "changePassword": "Change Password",
+      "passwordHelp": "You sign in with email and password on the sign-in page. Changing your password from this screen is not available yet.",
       "language": "Language",
       "openai": "OpenAI Integration",
       "apiTokens": "API Tokens"

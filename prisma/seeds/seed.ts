@@ -16,6 +16,7 @@ import leadStatusesData from "../initial-data/crm_Lead_Statuses.json";
 import leadTypesData from "../initial-data/crm_Lead_Types.json";
 
 import { seedCurrencies } from "./currencies";
+import { hashPassword } from "better-auth/crypto";
 
 const connectionString = process.env.DATABASE_URL!;
 const pool = new Pool({ connectionString });
@@ -139,6 +140,35 @@ async function main() {
     },
   });
   console.log(`Test user seeded: ${testUserEmail}`);
+
+  // Better Auth credential (email + password) for E2E / local sign-in
+  const testPasswordPlain =
+    process.env.TEST_USER_PASSWORD || "TestPassword123456!";
+  const passwordHash = await hashPassword(testPasswordPlain);
+  const testUser = await prisma.users.findUnique({
+    where: { email: testUserEmail },
+  });
+  if (testUser) {
+    const existingCred = await prisma.account.findFirst({
+      where: { userId: testUser.id, providerId: "credential" },
+    });
+    if (existingCred) {
+      await prisma.account.update({
+        where: { id: existingCred.id },
+        data: { password: passwordHash, accountId: testUser.id },
+      });
+    } else {
+      await prisma.account.create({
+        data: {
+          accountId: testUser.id,
+          providerId: "credential",
+          userId: testUser.id,
+          password: passwordHash,
+        },
+      });
+    }
+    console.log(`Test user credential account updated for ${testUserEmail}`);
+  }
 
   // Currencies and Exchange Rates
   await seedCurrencies(prisma);

@@ -1,6 +1,6 @@
 # Деплой GERS CRM (Docker)
 
-Цель: один `docker compose up`, миграции, сид, вход по email (OTP), заявки с сайта в лиды.
+Цель: один `docker compose up`, миграции, сид, вход по **email и паролю** (регистрация + логин), заявки с сайта в лиды.
 
 **Деплой на Vercel** (env в панели Vercel, без Docker): **[VERCEL-DEPLOY.md](./VERCEL-DEPLOY.md)**.
 
@@ -37,13 +37,13 @@ docker compose logs -f app
 
 Первый старт: entrypoint выполнит `prisma migrate deploy`, создаст бакет MinIO, при пустой БД — **seed** (справочники CRM + пользователь `ADMIN_EMAIL` со статусом ACTIVE и ролью admin).
 
-## 4. Вход
+## 4. Вход и регистрация
 
 1. Откройте `APP_PUBLIC_URL`.
-2. Войдите через **Google** (если настроены `GOOGLE_ID` / `GOOGLE_SECRET`) или через **email OTP**.
-3. Для OTP нужен рабочий **Resend** (`RESEND_API_KEY`, `EMAIL_FROM` с верифицированным доменом).
+2. **Регистрация:** `/register` — имя, email, пароль (не короче 8 символов). Новые пользователи по умолчанию в статусе **PENDING**, пока админ не активирует (как и раньше в форке).
+3. **Вход:** `/sign-in` — email и пароль.
 
-Если почта временно недоступна, код можно взять из БД (таблица `verification`, поле `value` — смотрите актуальный формат в логах/доке Better Auth).
+**Resend** (`RESEND_API_KEY`, `EMAIL_FROM`) по-прежнему нужен для **уведомлений админам** о новых заявках на регистрацию (`newUserNotify`), не для кода входа.
 
 ## 5. Заявки с сайта GERS
 

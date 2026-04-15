@@ -10,9 +10,7 @@ export async function SecurityTabContent({ userId: _userId }: Props) {
       <h3 className="mb-4 text-sm font-semibold text-card-foreground">
         {t("cards.changePassword")}
       </h3>
-      <p className="text-sm text-muted-foreground">
-        Password management is handled via your identity provider.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("cards.passwordHelp")}</p>
     </div>
   );
 }

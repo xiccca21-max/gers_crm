@@ -14,7 +14,7 @@
 
 1. Скопируйте **[`.env.gers.example`](./.env.gers.example)** → `.env`, заполните `APP_PUBLIC_URL`, `ADMIN_EMAIL`, `RESEND_API_KEY`, `NEXTCRM_TOKEN`, пароль Postgres.
 2. `docker compose up -d --build`
-3. Откройте `APP_PUBLIC_URL`, войдите (email OTP через Resend или Google OAuth).
+3. Откройте `APP_PUBLIC_URL`, зарегистрируйтесь (`/register`) или войдите (`/sign-in`) по **email и паролю**.
 
 ## Заявки с сайта
 

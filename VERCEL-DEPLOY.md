@@ -33,7 +33,7 @@ pnpm prisma migrate deploy
 | `BETTER_AUTH_SECRET` | Случайная строка (например `openssl rand -base64 32`). |
 | `BETTER_AUTH_URL` | Точный публичный URL CRM, **как в браузере**, без `/` в конце: `https://<project>.vercel.app` или кастомный домен. |
 | `NEXT_PUBLIC_APP_URL` | То же, что `BETTER_AUTH_URL`. |
-| `RESEND_API_KEY` | Ключ Resend для OTP по почте. |
+| `RESEND_API_KEY` | Ключ Resend для **писем админам** о новых пользователях (регистрация). |
 | `EMAIL_FROM` | Адрес отправителя в формате `user@verified-domain.com` (домен верифицирован в Resend). |
 | `NEXTCRM_TOKEN` | Секрет для `Authorization: Bearer …` на вебхуки (`/api/integrations/gers-inquiry` и совместимый эндпоинт лидов). |
 
@@ -44,8 +44,6 @@ pnpm prisma migrate deploy
 | `NEXT_PUBLIC_GERS_SLIM_UI` | `1` (или не задавать — в `.env.example` slim по умолчанию). |
 | `NEXT_PUBLIC_APP_NAME` | Например `GERS CRM`. |
 | `GERS_WEBHOOK_ALLOWED_ORIGINS` | Если заявки с сайта идут **из браузера** с другого домена — origins через запятую. Серверный `fetch` с сайта CORS не требует. |
-
-**Google OAuth:** при использовании входа через Google добавь `GOOGLE_ID`, `GOOGLE_SECRET` и в Google Cloud Console укажи redirect URI для Better Auth на твой `BETTER_AUTH_URL` (см. доку Better Auth / консоль ошибок при логине).
 
 ## 3. Первый запуск БД: миграции и сид
 
