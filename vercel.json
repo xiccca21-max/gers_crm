@@ -4,7 +4,27 @@
   "buildCommand": "pnpm run vercel-build",
   "build": {
     "env": {
-      "NODE_VERSION": "22.x"
+      "NODE_VERSION": "22.x",
+      "SKIP_ENV_VALIDATION": "1",
+      "BETTER_AUTH_SECRET": "build-time-placeholder-secret-replace-at-runtime",
+      "BETTER_AUTH_URL": "http://127.0.0.1:3000",
+      "NEXT_PUBLIC_APP_URL": "http://127.0.0.1:3000",
+      "INNGEST_ID": "nextcrm-build",
+      "INNGEST_APP_NAME": "NextCRM-Build",
+      "INNGEST_EVENT_KEY": "build-placeholder",
+      "INNGEST_SIGNING_KEY": "build-placeholder",
+      "MINIO_ENDPOINT": "http://127.0.0.1:9000",
+      "MINIO_PORT": "9000",
+      "MINIO_BUCKET": "placeholder",
+      "MINIO_USE_SSL": "false",
+      "MINIO_ACCESS_KEY": "placeholder",
+      "MINIO_SECRET_KEY": "placeholder",
+      "NEXT_PUBLIC_MINIO_ENDPOINT": "http://127.0.0.1:9000",
+      "EMAIL_ENCRYPTION_KEY": "0000000000000000000000000000000000000000000000000000000000000000",
+      "OPENAI_API_KEY": "sk-placeholder-for-build",
+      "RESEND_API_KEY": "re_placeholder_for_build",
+      "EMAIL_FROM": "build@example.com",
+      "NEXT_PUBLIC_APP_NAME": "GERS CRM"
     }
   }
 }

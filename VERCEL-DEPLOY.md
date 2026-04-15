@@ -13,6 +13,8 @@
 
 **`DATABASE_URL` на этапе build** всё равно нужен для `prisma generate` ([`prisma.config.ts`](./prisma.config.ts)). В Vercel: **Settings → Environment Variables** → **Expose to Build** для Production/Preview, затем **Redeploy**.
 
+В [`vercel.json`](./vercel.json) в **`build.env`** заданы **заглушки** (как в `Dockerfile` для `next build`), чтобы сборка не падала на Better Auth / Inngest / MinIO при первом деплое. Для **продакшена** обязательно задай в панели Vercel реальные **`BETTER_AUTH_SECRET`**, **`BETTER_AUTH_URL`**, **`NEXT_PUBLIC_APP_URL`**, почту (**`RESEND_API_KEY`**, **`EMAIL_FROM`**), при необходимости **Google OAuth** и **Inngest** — значения из UI **перекрывают** заглушки в рантайме и (при включённом Expose to Build) на этапе сборки.
+
 **Почему нет `prisma migrate deploy` на Vercel:** билд-серверы часто не достучатся до Supabase по **прямому** хосту `db.*.supabase.co:5432` (ошибка `P1001`). Миграции один раз выполни с машины, где есть доступ к БД:
 
 ```bash
