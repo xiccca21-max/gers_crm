@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
 import dotenv from "dotenv";
 import path from "path";
+import { normalizeServerlessPostgresUrl, preferIpv4FirstForDbConnections } from "../../lib/prisma-env";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
@@ -18,11 +17,12 @@ import leadTypesData from "../initial-data/crm_Lead_Types.json";
 import { seedCurrencies } from "./currencies";
 import { hashPassword } from "better-auth/crypto";
 
-const connectionString = process.env.DATABASE_URL!;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
+preferIpv4FirstForDbConnections();
+const dbUrl = normalizeServerlessPostgresUrl(process.env.DATABASE_URL!);
 
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({
+  datasources: { db: { url: dbUrl } },
+});
 
 async function upsertByName(
   model: any,
