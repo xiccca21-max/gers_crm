@@ -13,11 +13,32 @@ const BETTER_AUTH_SECRET_PLACEHOLDERS = new Set([
   "generate-with-openssl-rand-base64-32",
 ]);
 
-/** Секрет сессий: на Vercel/проде обязателен свой (≥32), иначе Better Auth падает с «default secret». */
+/** Как в vercel.json `build.env` — на Vercel `collectPageData` иногда без `SKIP_ENV_VALIDATION`. */
+const VERCEL_JSON_BUILD_PLACEHOLDER = "build-time-placeholder-secret-replace-at-runtime";
+
+/** Только для `next build`: в vercel.json / Dockerfile на сборку — SKIP_ENV_VALIDATION=1 и плейсхолдер секрета. */
+const BUILD_TIME_BETTER_AUTH_SECRET = `build-only-better-auth-secret-${"0".repeat(48)}`;
+
+function isNextProductionOrDevelopmentBuild(): boolean {
+  const phase = process.env.NEXT_PHASE;
+  return phase === "phase-production-build" || phase === "phase-development-build";
+}
+
+/** Секрет сессий: в проде в рантайме нужен свой секрет ≥32 символов. */
 function resolveBetterAuthSecret(): string {
   const raw = process.env.BETTER_AUTH_SECRET?.trim();
   if (raw && !BETTER_AUTH_SECRET_PLACEHOLDERS.has(raw) && raw.length >= 32) {
     return raw;
+  }
+  if (
+    process.env.SKIP_ENV_VALIDATION === "1" ||
+    isNextProductionOrDevelopmentBuild()
+  ) {
+    return BUILD_TIME_BETTER_AUTH_SECRET;
+  }
+  // `next build` (в т.ч. collectPageData) часто с NODE_ENV=production без VERCEL=1 — только такой плейсхолдер из vercel.json.
+  if (raw === VERCEL_JSON_BUILD_PLACEHOLDER) {
+    return BUILD_TIME_BETTER_AUTH_SECRET;
   }
   const mustConfigure = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
   if (mustConfigure) {
