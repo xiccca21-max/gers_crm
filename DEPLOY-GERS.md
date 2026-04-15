@@ -14,7 +14,7 @@
 
 ```bash
 cp .env.gers.example .env
-# отредактируйте .env: APP_PUBLIC_URL, ADMIN_EMAIL, POSTGRES_PASSWORD, RESEND_API_KEY, EMAIL_FROM, NEXTCRM_TOKEN
+# отредактируйте .env: APP_PUBLIC_URL, ADMIN_EMAIL, POSTGRES_PASSWORD, SMTP (EMAIL_*), NEXTCRM_TOKEN; при необходимости RESEND_API_KEY
 ```
 
 **Важно:** `APP_PUBLIC_URL` должен совпадать с тем, как пользователи открывают CRM в браузере (схема + хост, без `/` в конце). Иначе Better Auth и magic-link не сработают.
