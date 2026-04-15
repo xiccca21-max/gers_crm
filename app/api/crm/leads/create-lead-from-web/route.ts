@@ -1,5 +1,6 @@
 import { prismadb } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { verifyNextCrmWebhookToken } from "@/lib/verify-webhook-token";
 
 export async function POST(req: Request) {
   if (req.headers.get("content-type") !== "application/json") {
@@ -24,19 +25,13 @@ export async function POST(req: Request) {
   //Validate auth with token from .env.local
   const token = headers.get("authorization");
 
-  if (!token) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
-  if (!process.env.NEXTCRM_TOKEN) {
-    return NextResponse.json(
-      { message: "NEXTCRM_TOKEN not defined in .env.local file" },
-      { status: 401 }
-    );
-  }
-
-  if (token.trim() !== process.env.NEXTCRM_TOKEN.trim()) {
-    console.log("Unauthorized");
+  if (!verifyNextCrmWebhookToken(token)) {
+    if (!process.env.NEXTCRM_TOKEN?.trim()) {
+      return NextResponse.json(
+        { message: "NEXTCRM_TOKEN not defined in environment" },
+        { status: 401 },
+      );
+    }
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   } else {
     if (!lastName) {

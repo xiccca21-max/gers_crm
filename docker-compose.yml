@@ -76,8 +76,8 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       DB_NAME: ${POSTGRES_DB:-nextcrm}
 
-      # Auth
-      BETTER_AUTH_URL: http://localhost:3000
+      # Auth — must match how users open the app (see DEPLOY-GERS.md)
+      BETTER_AUTH_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
       # BETTER_AUTH_SECRET is auto-generated if not set
 
       # MinIO — values come from the same env vars as the minio service.
@@ -98,8 +98,13 @@ services:
       INNGEST_BASE_URL: http://inngest:8288
 
       # App
-      NEXT_PUBLIC_APP_NAME: NextCRM
-      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-GERS CRM}
+      NEXT_PUBLIC_APP_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
+      NEXT_PUBLIC_GERS_SLIM_UI: ${NEXT_PUBLIC_GERS_SLIM_UI:-1}
+
+      # Webhook: same secret for /api/integrations/gers-inquiry and /api/crm/leads/create-lead-from-web
+      NEXTCRM_TOKEN: ${NEXTCRM_TOKEN:-change-me-set-in-env}
+      GERS_WEBHOOK_ALLOWED_ORIGINS: ${GERS_WEBHOOK_ALLOWED_ORIGINS:-}
 
       # Initial admin account (created on first run by the seed script).
       # IMPORTANT: set this to a real email you control. The app uses

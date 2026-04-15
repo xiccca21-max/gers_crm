@@ -1,28 +1,28 @@
 {
   "RootLayout": {
-    "title": "NextCRM",
-    "description": "NextCRM is an open source CRM build on top of NextJS."
+    "title": "GERS CRM",
+    "description": "Внутренняя CRM GERS Agency."
   },
   "ModuleMenu": {
-    "dashboard": "Dashboard",
+    "dashboard": "Панель",
     "crm": {
-      "title": "Sales",
-      "accounts": "Companies",
-      "opportunities": "Opportunities",
-      "contacts": "Contacts",
-      "leads": "Leads",
-      "contracts": "Contracts",
-      "products": "Products",
-      "targets": "Targets",
-      "targetLists": "Target Lists"
+      "title": "Продажи",
+      "accounts": "Компании",
+      "opportunities": "Сделки",
+      "contacts": "Контакты",
+      "leads": "Лиды",
+      "contracts": "Договоры",
+      "products": "Продукты",
+      "targets": "Цели",
+      "targetLists": "Списки целей"
     },
-    "projects": "Projects",
-    "emails": "E-mails",
-    "tasks": "Tasks",
-    "reports": "Reports",
-    "documents": "Documents",
-    "storage": "Storage",
-    "settings": "Administration"
+    "projects": "Проекты",
+    "emails": "Почта",
+    "tasks": "Задачи",
+    "reports": "Отчёты",
+    "documents": "Документы",
+    "storage": "Файлы",
+    "settings": "Администрирование"
   },
   "DashboardPage": {
     "containerTitle": "Dashboard",
@@ -45,7 +45,7 @@
     "cardTitle": "Create new account",
     "cardDescription": "Create account by login with",
     "label": "Language",
-    "locale": "{locale, select, ru {Russian} de {German} en {English} cz {Czech} uk {Ukrainian} other {Unknown}}"
+    "locale": "{locale, select, ru {Русский} de {German} en {English} cz {Czech} uk {Ukrainian} other {Unknown}}"
   },
   "CrmModuleMenuComponent": {
     "menuTitle": "Sales"
@@ -74,7 +74,7 @@
     "czech": "Czech",
     "german": "German",
     "ukrainian": "Ukrainian",
-    "russian": "Russian",
+    "russian": "Русский",
     "selectPlaceholder": "Select language...",
     "searchPlaceholder": "Search language...",
     "noResult": "No language found.",

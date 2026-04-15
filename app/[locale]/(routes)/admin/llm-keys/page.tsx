@@ -4,8 +4,14 @@ import { getSession } from "@/lib/auth-server";
 import Container from "../../components/ui/Container";
 import { getTranslations } from "next-intl/server";
 import { AlertCircle } from "lucide-react";
+import { redirect } from "next/navigation";
+import { isGersSlimUi } from "@/lib/gers";
 
 export default async function LlmKeysPage() {
+  if (isGersSlimUi()) {
+    redirect("/admin/users");
+  }
+
   const session = await getSession();
   const t = await getTranslations("AdminPage");
 

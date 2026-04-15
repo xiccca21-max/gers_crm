@@ -1,6 +1,14 @@
 import { createMcpHandler } from "mcp-handler";
 import { getMcpUser } from "@/lib/mcp/auth";
 import { allTools } from "@/lib/mcp/tools";
+import { isGersSlimUi } from "@/lib/gers";
+
+function disabledResponse() {
+  return new Response(JSON.stringify({ error: "MCP disabled in GERS slim build" }), {
+    status: 404,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 const handler = createMcpHandler(
   (server) => {
@@ -34,4 +42,18 @@ const handler = createMcpHandler(
   }
 );
 
-export { handler as GET, handler as POST };
+export function GET(
+  req: Request,
+  ctx: { params: Promise<{ transport: string }> }
+) {
+  if (isGersSlimUi()) return disabledResponse();
+  return handler(req, ctx);
+}
+
+export function POST(
+  req: Request,
+  ctx: { params: Promise<{ transport: string }> }
+) {
+  if (isGersSlimUi()) return disabledResponse();
+  return handler(req, ctx);
+}

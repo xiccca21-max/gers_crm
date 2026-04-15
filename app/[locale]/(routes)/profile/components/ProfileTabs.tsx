@@ -1,10 +1,13 @@
 // app/[locale]/(routes)/profile/components/ProfileTabs.tsx
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { UserCircle, Lock, Globe, Code2, Mail, KeyRound } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { isGersSlimUi } from "@/lib/gers";
 
 // Do NOT import tab content components here — they are Server Components
 // and must be passed as ReactNode props from page.tsx
@@ -39,20 +42,40 @@ export function ProfileTabs({
 }: Props) {
   const t = useTranslations("ProfilePage");
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const slim = isGersSlimUi();
 
-  const TAB_IDS: Tab[] = ["profile", "security", "preferences", "developer", "emails", "llms"];
+  const TAB_IDS: Tab[] = useMemo(() => {
+    const all: Tab[] = ["profile", "security", "preferences", "developer", "emails", "llms"];
+    if (!slim) return all;
+    return all.filter((id) => id !== "developer" && id !== "llms");
+  }, [slim]);
+
   const raw = searchParams.get("tab");
-  const activeTab: Tab = TAB_IDS.includes(raw as Tab) ? (raw as Tab) : "profile";
+  let activeTab: Tab = TAB_IDS.includes(raw as Tab) ? (raw as Tab) : "profile";
+  if (!TAB_IDS.includes(activeTab)) activeTab = "profile";
 
-  const tabs: { id: Tab; label: string; desc: string }[] = [
-    { id: "profile", label: t("tabs.profile"), desc: t("tabs.profileDesc") },
-    { id: "security", label: t("tabs.security"), desc: t("tabs.securityDesc") },
-    { id: "preferences", label: t("tabs.preferences"), desc: t("tabs.preferencesDesc") },
-    { id: "developer", label: t("tabs.developer"), desc: t("tabs.developerDesc") },
-    { id: "emails", label: t("tabs.emails"), desc: t("tabs.emailsDesc") },
-    { id: "llms", label: t("tabs.llms"), desc: t("tabs.llmsDesc") },
-  ];
+  useEffect(() => {
+    if (slim && (raw === "developer" || raw === "llms")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("tab");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    }
+  }, [slim, raw, router, searchParams, pathname]);
+
+  const tabs: { id: Tab; label: string; desc: string }[] = useMemo(() => {
+    const defs: { id: Tab; label: string; desc: string }[] = [
+      { id: "profile", label: t("tabs.profile"), desc: t("tabs.profileDesc") },
+      { id: "security", label: t("tabs.security"), desc: t("tabs.securityDesc") },
+      { id: "preferences", label: t("tabs.preferences"), desc: t("tabs.preferencesDesc") },
+      { id: "developer", label: t("tabs.developer"), desc: t("tabs.developerDesc") },
+      { id: "emails", label: t("tabs.emails"), desc: t("tabs.emailsDesc") },
+      { id: "llms", label: t("tabs.llms"), desc: t("tabs.llmsDesc") },
+    ];
+    return defs.filter((d) => TAB_IDS.includes(d.id));
+  }, [TAB_IDS, t]);
 
   const activeTabMeta = tabs.find((t) => t.id === activeTab) ?? tabs[0];
 

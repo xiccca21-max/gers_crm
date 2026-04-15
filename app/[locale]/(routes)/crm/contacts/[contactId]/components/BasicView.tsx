@@ -23,6 +23,7 @@ import Link from "next/link";
 import { EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import { Badge } from "@/components/ui/badge";
 import { EnrichButton } from "./EnrichButton";
+import { isGersSlimUi } from "@/lib/gers";
 import { ContactDetailActions } from "./ContactDetailActions";
 import { getAllCrmData } from "@/actions/crm/get-crm-data";
 
@@ -32,6 +33,7 @@ interface OppsViewProps {
 
 export async function BasicView({ data }: OppsViewProps) {
   //console.log(data, "data");
+  const slim = isGersSlimUi();
   const users = await prismadb.users.findMany();
   const crmData = await getAllCrmData();
   const contactTypes = crmData.contactTypes;
@@ -49,21 +51,23 @@ export async function BasicView({ data }: OppsViewProps) {
               <CardDescription>ID:{data.id}</CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <EnrichButton
-                contactId={data.id}
-                contactEmail={data.email ?? null}
-                contactCurrentData={{
-                  position:         data.position ?? null,
-                  website:          data.website ?? null,
-                  social_linkedin:  data.social_linkedin ?? null,
-                  social_twitter:   data.social_twitter ?? null,
-                  social_facebook:  data.social_facebook ?? null,
-                  social_instagram: data.social_instagram ?? null,
-                  description:      data.description ?? null,
-                  office_phone:     data.office_phone ?? null,
-                  mobile_phone:     data.mobile_phone ?? null,
-                }}
-              />
+              {!slim && (
+                <EnrichButton
+                  contactId={data.id}
+                  contactEmail={data.email ?? null}
+                  contactCurrentData={{
+                    position:         data.position ?? null,
+                    website:          data.website ?? null,
+                    social_linkedin:  data.social_linkedin ?? null,
+                    social_twitter:   data.social_twitter ?? null,
+                    social_facebook:  data.social_facebook ?? null,
+                    social_instagram: data.social_instagram ?? null,
+                    description:      data.description ?? null,
+                    office_phone:     data.office_phone ?? null,
+                    mobile_phone:     data.mobile_phone ?? null,
+                  }}
+                />
+              )}
               <ContactDetailActions contact={data} contactTypes={contactTypes} />
             </div>
           </div>

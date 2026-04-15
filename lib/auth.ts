@@ -44,7 +44,7 @@ export const auth = betterAuth({
       },
       userLanguage: {
         type: "string",
-        defaultValue: "en",
+        defaultValue: "ru",
         input: false,
       },
       avatar: {

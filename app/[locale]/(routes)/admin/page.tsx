@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
+import { isGersSlimUi } from "@/lib/gers";
 
 export default function AdminPage() {
-  redirect("/admin/llm-keys");
+  redirect(isGersSlimUi() ? "/admin/users" : "/admin/llm-keys");
 }

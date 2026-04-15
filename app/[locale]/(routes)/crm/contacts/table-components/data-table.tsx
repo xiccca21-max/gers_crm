@@ -30,6 +30,7 @@ import { DataTableToolbar } from "./data-table-toolbar";
 import { PanelTopClose, PanelTopOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BulkEnrichModal } from "../components/BulkEnrichModal";
+import { isGersSlimUi } from "@/lib/gers";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -50,6 +51,7 @@ export function ContactsDataTable<TData, TValue>({
 
   const [hide, setHide] = React.useState(false);
   const [bulkEnrichOpen, setBulkEnrichOpen] = React.useState(false);
+  const slim = isGersSlimUi();
 
   const table = useReactTable({
     data,
@@ -99,7 +101,7 @@ export function ContactsDataTable<TData, TValue>({
       ) : (
         <>
           <DataTableToolbar table={table} />
-          {table.getSelectedRowModel().rows.length > 0 && (
+          {table.getSelectedRowModel().rows.length > 0 && !slim && (
             <>
               <div className="flex items-center gap-2 py-2 px-1 bg-muted/50 rounded-md border">
                 <span className="text-sm text-muted-foreground">

@@ -54,6 +54,7 @@ export function SetLanguage({ userId }: Props) {
   const t = useTranslations("LanguageSelector");
 
   const languages = [
+    { label: t("russian"), value: "ru" },
     { label: t("english"), value: "en" },
     { label: t("czech"), value: "cz" },
     { label: t("german"), value: "de" },

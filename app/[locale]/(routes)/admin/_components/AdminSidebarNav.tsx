@@ -4,18 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Key, Users, Settings, SlidersHorizontal, ClipboardList, Coins } from "lucide-react";
+import { isGersSlimUi } from "@/lib/gers";
 
-const navItems = [
-  { label: "LLM Keys",     href: "/admin/llm-keys",    icon: Key },
-  { label: "Users",        href: "/admin/users",        icon: Users },
-  { label: "Services",     href: "/admin/services",     icon: Settings },
-  { label: "CRM Settings", href: "/admin/crm-settings", icon: SlidersHorizontal },
-  { label: "Audit Log",    href: "/admin/audit-log",    icon: ClipboardList },
-  { label: "Currencies",   href: "/admin/currencies",  icon: Coins },
-];
+const allNavItems = [
+  { label: "LLM Keys", href: "/admin/llm-keys", icon: Key, gersHide: true },
+  { label: "Users", href: "/admin/users", icon: Users, gersHide: false },
+  { label: "Services", href: "/admin/services", icon: Settings, gersHide: false },
+  { label: "CRM Settings", href: "/admin/crm-settings", icon: SlidersHorizontal, gersHide: false },
+  { label: "Audit Log", href: "/admin/audit-log", icon: ClipboardList, gersHide: false },
+  { label: "Currencies", href: "/admin/currencies", icon: Coins, gersHide: false },
+] as const;
 
 export function AdminSidebarNav() {
   const pathname = usePathname();
+  const slim = isGersSlimUi();
+  const navItems = allNavItems.filter((i) => !(slim && i.gersHide));
 
   return (
     <nav className="flex flex-col gap-1">

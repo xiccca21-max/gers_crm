@@ -1043,6 +1043,7 @@ enum Language {
   en
   de
   uk
+  ru
 }
 
 
