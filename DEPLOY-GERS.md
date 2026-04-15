@@ -14,7 +14,7 @@
 
 ```bash
 cp .env.gers.example .env
-# отредактируйте .env: APP_PUBLIC_URL, ADMIN_EMAIL, POSTGRES_PASSWORD, SMTP (EMAIL_*), NEXTCRM_TOKEN; при необходимости RESEND_API_KEY
+# отредактируйте .env: APP_PUBLIC_URL, ADMIN_EMAIL, POSTGRES_PASSWORD, RESEND_API_KEY, EMAIL_FROM, NEXTCRM_TOKEN
 ```
 
 **Важно:** `APP_PUBLIC_URL` должен совпадать с тем, как пользователи открывают CRM в браузере (схема + хост, без `/` в конце). Иначе Better Auth и magic-link не сработают.
@@ -43,7 +43,7 @@ docker compose logs -f app
 2. **Регистрация:** `/register` — имя, **логин** (латиница, цифры, `_`), пароль (не короче 8 символов). Почта не спрашивается; в БД сохраняется служебный адрес вида `{логин}@users.invalid` (валидный для Better Auth / Zod `z.email()`). Новые пользователи по умолчанию **PENDING**, пока админ не активирует.
 3. **Вход:** `/sign-in` — логин и пароль.
 
-Уведомление админам о новой регистрации: `newUserNotify` → `lib/sendmail.ts` (**SMTP**: `EMAIL_HOST`, `EMAIL_USERNAME`, `EMAIL_PASSWORD`, плюс `EMAIL_FROM`). Пакет **resend** / `RESEND_API_KEY` в проекте — из апстрим-NextCRM (кампании, `lib/resend.ts`, Inngest), не эта ветка отправки для `newUserNotify`.
+**Resend** (`RESEND_API_KEY`, `EMAIL_FROM`) по-прежнему нужен для **уведомлений админам** о новых заявках на регистрацию (`newUserNotify`), не для кода входа.
 
 ## 5. Заявки с сайта GERS
 

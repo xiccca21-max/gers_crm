@@ -13,7 +13,7 @@
 
 **`DATABASE_URL` на этапе build** всё равно нужен для `prisma generate` ([`prisma.config.ts`](./prisma.config.ts)). В Vercel: **Settings → Environment Variables** → **Expose to Build** для Production/Preview, затем **Redeploy**.
 
-В [`vercel.json`](./vercel.json) в **`build.env`** заданы **заглушки** (как в `Dockerfile` для `next build`), чтобы сборка не падала на Better Auth / Inngest / MinIO при первом деплое. Для **продакшена** задай в панели Vercel **`BETTER_AUTH_SECRET`**, **`BETTER_AUTH_URL`**, **`NEXT_PUBLIC_APP_URL`**, для писем админам о регистрации — **`EMAIL_HOST`**, **`EMAIL_USERNAME`**, **`EMAIL_PASSWORD`**, **`EMAIL_FROM`**; для фич апстрима с Resend — **`RESEND_API_KEY`** (и при необходимости **`EMAIL_FROM`** как from там, где вызывается Resend); плюс **Inngest** и т.д. — значения из UI перекрывают заглушки `vercel.json`.
+В [`vercel.json`](./vercel.json) в **`build.env`** заданы **заглушки** (как в `Dockerfile` для `next build`), чтобы сборка не падала на Better Auth / Inngest / MinIO при первом деплое. Для **продакшена** обязательно задай в панели Vercel реальные **`BETTER_AUTH_SECRET`**, **`BETTER_AUTH_URL`**, **`NEXT_PUBLIC_APP_URL`**, почту (**`RESEND_API_KEY`**, **`EMAIL_FROM`**), при необходимости **Google OAuth** и **Inngest** — значения из UI **перекрывают** заглушки в рантайме и (при включённом Expose to Build) на этапе сборки.
 
 **Почему нет `prisma migrate deploy` на Vercel:** билд-серверы часто не достучатся до Supabase по **прямому** хосту `db.*.supabase.co:5432` (ошибка `P1001`). Миграции один раз выполни с машины, где есть доступ к БД:
 
@@ -33,9 +33,8 @@ pnpm prisma migrate deploy
 | `BETTER_AUTH_SECRET` | Случайная строка (например `openssl rand -base64 32`). |
 | `BETTER_AUTH_URL` | Точный публичный URL CRM, **как в браузере**, без `/` в конце: `https://<project>.vercel.app` или кастомный домен. |
 | `NEXT_PUBLIC_APP_URL` | То же, что `BETTER_AUTH_URL`. |
-| `EMAIL_HOST` / `EMAIL_USERNAME` / `EMAIL_PASSWORD` | SMTP для `lib/sendmail.ts` — уведомления админам о новой регистрации (`newUserNotify`). |
-| `EMAIL_FROM` | From для того же SMTP (и где ещё используется в приложении). |
-| `RESEND_API_KEY` | Ключ Resend — из апстрим-NextCRM (кампании, `lib/resend.ts` и т.д.), не путь `newUserNotify`. |
+| `RESEND_API_KEY` | Ключ Resend для **писем админам** о новых пользователях (регистрация). |
+| `EMAIL_FROM` | Адрес отправителя в формате `user@verified-domain.com` (домен верифицирован в Resend). |
 | `NEXTCRM_TOKEN` | Секрет для `Authorization: Bearer …` на вебхуки (`/api/integrations/gers-inquiry` и совместимый эндпоинт лидов). |
 | `BETTER_AUTH_ALLOWED_HOSTS` | Опционально: дополнительные host через запятую (кастомный домен CRM), если не покрывается `BETTER_AUTH_URL` и `*.vercel.app`. |
 
