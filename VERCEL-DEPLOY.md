@@ -9,9 +9,19 @@
 1. [Vercel Dashboard](https://vercel.com/dashboard) → **Add New…** → **Project** → импорт **`xiccca21-max/gers-nextcrm`** (или подключи этот репозиторий к уже существующему проекту в **Settings → Git**).
 2. **Framework Preset:** Next.js (определится сам).
 3. **Root Directory:** корень репозитория (если монорепо — укажи подпапку с `package.json`).
-4. **Build Command** / **Install Command** уже заданы в [`vercel.json`](./vercel.json) (`pnpm install --frozen-lockfile`, `pnpm run build`). В **`package.json` → engines** указано `^22.12.0`, в `vercel.json` задан **`NODE_VERSION=22.x`**, чтобы Vercel не поднимал **Node 24** (у `canvas` часто нет пребилдов под новый ABI и падает `pnpm install`).
+4. **Build Command** / **Install Command** заданы в [`vercel.json`](./vercel.json): `pnpm install --frozen-lockfile` и **`pnpm run vercel-build`** (`prisma generate` + `next build` **без** `migrate deploy` на билде). В **`package.json` → engines** указано `^22.12.0`, в `vercel.json` задан **`NODE_VERSION=22.x`**, чтобы Vercel не поднимал **Node 24** (у `canvas` часто нет пребилдов под новый ABI).
 
-**Без `DATABASE_URL` сборка не пройдёт:** `prisma generate` читает URL из [`prisma.config.ts`](./prisma.config.ts). Добавь `DATABASE_URL` в **Settings → Environment Variables** для **Production** и **Preview** и отметь **Expose to Build**, затем **Redeploy**.
+**`DATABASE_URL` на этапе build** всё равно нужен для `prisma generate` ([`prisma.config.ts`](./prisma.config.ts)). В Vercel: **Settings → Environment Variables** → **Expose to Build** для Production/Preview, затем **Redeploy**.
+
+**Почему нет `prisma migrate deploy` на Vercel:** билд-серверы часто не достучатся до Supabase по **прямому** хосту `db.*.supabase.co:5432` (ошибка `P1001`). Миграции один раз выполни с машины, где есть доступ к БД:
+
+```bash
+# PowerShell: подставь строку из Vercel или vercel env pull
+$env:DATABASE_URL = "postgresql://..."
+pnpm prisma migrate deploy
+```
+
+Либо в Supabase используй **Transaction pooler** (порт **6543**) в `DATABASE_URL` для рантайма и отдельно прогоняй миграции с хоста с доступом к **direct** (5432), если настроишь оба URL у себя.
 
 ## 2. Обязательные переменные (минимум для входа и CRM)
 
@@ -37,7 +47,7 @@
 
 ## 3. Первый запуск БД: миграции и сид
 
-- **Миграции** выполняются на каждой сборке: `pnpm run build` → `prisma migrate deploy` (нужен `DATABASE_URL` в окружении **build** на Vercel — включи для Production и при необходимости Preview).
+- **Миграции** на Vercel **не** вшиты в `vercel-build` (см. выше). После первого деплоя выполни **`pnpm prisma migrate deploy`** локально с продовым `DATABASE_URL` или через CI. Для Docker по-прежнему используй **`pnpm run build`** / entrypoint с миграциями.
 - **Сид** (`prisma/seed`) на Vercel **не** запускается автоматически. Один раз с машины, где есть `pnpm` и доступ к той же БД:
 
   ```bash
