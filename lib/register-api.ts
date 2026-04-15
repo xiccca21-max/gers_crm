@@ -39,11 +39,15 @@ export async function signUpEmailViaFetch(params: {
     const j = JSON.parse(text) as {
       message?: string;
       code?: string;
+      hint?: string;
       errors?: unknown;
       error?: string;
     };
     if (typeof j.message === "string" && j.message.trim()) {
       userMessage = j.code ? `${j.message} (${j.code})` : j.message;
+      if (j.code === "DATABASE_UNAVAILABLE" && typeof j.hint === "string" && j.hint.trim()) {
+        userMessage = `${userMessage}\n\n${j.hint.trim()}`;
+      }
     } else if (typeof j.code === "string") {
       userMessage = `${userMessage}: ${j.code}`;
     } else if (j.errors != null) {

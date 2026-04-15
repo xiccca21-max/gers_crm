@@ -62,6 +62,24 @@ export function databaseUrlHint(): string {
   }
 }
 
+/** Подсказка для UI/логов, если Postgres недоступен (часто Vercel + Supabase direct :5432). */
+export function databaseFailureUserHint(pingMessage: string): string {
+  const url = process.env.DATABASE_URL?.trim() ?? "";
+  const chunks: string[] = [];
+  if (/P1001|Can't reach database|DatabaseNotReachable|ECONNREFUSED|ETIMEDOUT/i.test(pingMessage)) {
+    chunks.push("Код/тип: недоступен хост Postgres с текущего сервера (часто сеть/IPv6, не «неверный пароль»).");
+  }
+  if (/db\.[^.]+\.supabase\.co/i.test(url) && !/:6543\b/.test(url)) {
+    chunks.push(
+      "Похоже на прямой хост Supabase `db.*.supabase.co` (порт 5432). На Vercel с Prisma часто нужна строка из Supabase → Project Settings → Database → Connection string → **Session pooler** или **Transaction pooler** (порт **6543**, хост вида `*.pooler.supabase.com`). Отдельно проверь: проект в Supabase не **на паузе** (Free tier). Документация: https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler"
+    );
+  }
+  if (chunks.length === 0) {
+    return "Проверь `DATABASE_URL` в Vercel (Production и Preview), доступность БД с интернета и что строка — именно Postgres URI из раздела Database.";
+  }
+  return chunks.join(" ");
+}
+
 export function shouldPingDbForPath(pathname: string): boolean {
   return (
     pathname.includes("sign-up") ||

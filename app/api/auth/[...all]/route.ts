@@ -3,6 +3,7 @@ import { toNextJsHandler } from "better-auth/next-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
+  databaseFailureUserHint,
   databaseUrlHint,
   pingDatabase,
   redactJsonForLog,
@@ -45,6 +46,17 @@ export async function POST(req: NextRequest) {
         err: ping.message,
         hint: "Prisma нужен Postgres URI (postgresql://…), из Supabase: Project Settings → Database — не URL/anon из «Connect» для JS SDK.",
       });
+      return NextResponse.json(
+        {
+          code: "DATABASE_UNAVAILABLE",
+          message:
+            "PostgreSQL недоступен с сервера: регистрация и вход не могут продолжиться, пока не исправлен DATABASE_URL или сеть до БД.",
+          details: ping.message,
+          hint: databaseFailureUserHint(ping.message),
+          database: hint,
+        },
+        { status: 503 }
+      );
     }
     try {
       const ct = req.headers.get("content-type") || "";
