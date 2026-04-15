@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Link } from "@/i18n/navigation";
+import { formatAuthClientError } from "@/lib/format-auth-client-error";
 import { normalizeLogin } from "@/lib/username-login";
 
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ export function LoginComponent() {
         rememberMe: true,
       });
       if (error) {
-        toast.error(error.message || "Не удалось войти.");
+        toast.error(formatAuthClientError(error));
         return;
       }
       toast.success("Вход выполнен.");

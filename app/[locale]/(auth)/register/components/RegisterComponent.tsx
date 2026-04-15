@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Link } from "@/i18n/navigation";
+import { formatAuthClientError } from "@/lib/format-auth-client-error";
 import { internalEmailFromLogin, normalizeLogin } from "@/lib/username-login";
 
 import { Button } from "@/components/ui/button";
@@ -52,13 +53,9 @@ export function RegisterComponent() {
         username: user,
       });
       if (error) {
-        console.error("[register] signUp.email failed", {
-          message: error.message,
-          status: (error as { status?: number }).status,
-          code: (error as { code?: string }).code,
-          data,
-        });
-        toast.error(error.message || "Не удалось зарегистрироваться.");
+        const detail = formatAuthClientError(error);
+        console.error("[register] signUp.email failed", error, { data, detail });
+        toast.error(detail);
         return;
       }
       toast.success("Аккаунт создан.");
