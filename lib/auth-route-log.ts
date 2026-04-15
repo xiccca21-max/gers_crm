@@ -71,11 +71,11 @@ export function databaseFailureUserHint(pingMessage: string): string {
   }
   if (/db\.[^.]+\.supabase\.co/i.test(url) && !/:6543\b/.test(url)) {
     chunks.push(
-      "Похоже на прямой хост Supabase `db.*.supabase.co` (порт 5432). На Vercel с Prisma часто нужна строка из Supabase → Project Settings → Database → Connection string → **Session pooler** или **Transaction pooler** (порт **6543**, хост вида `*.pooler.supabase.com`). Отдельно проверь: проект в Supabase не **на паузе** (Free tier). Документация: https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler"
+      "Похоже на прямой хост Supabase `db.*.supabase.co` (порт 5432). Нужна строка **Session pooler** или **Transaction pooler** (порт **6543**, хост `*.pooler.supabase.com`). Где взять в Supabase: НЕ экран «иконка Database → Settings» (там только размер пула и SSL — URI нет). Возьми URI так: **внизу слева шестерёнка «Project Settings»** → в левом меню этого окна пункт **Database** → блок **Connection string** / режим pooler; либо на **главной проекта** кнопка **Connect** → вкладка **ORM / URI**. Док: https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler Проверь, что проект не на паузе (Free)."
     );
   }
   if (chunks.length === 0) {
-    return "Проверь `DATABASE_URL` в Vercel (Production и Preview), доступность БД с интернета и что строка — именно Postgres URI из раздела Database.";
+    return "Проверь `DATABASE_URL` в Vercel (Production и Preview). Для Supabase URI с pooler — шестерёнка Project Settings внизу → Database → Connection string, или кнопка Connect на главной проекта (не Database→Settings в меню цилиндра).";
   }
   return chunks.join(" ");
 }

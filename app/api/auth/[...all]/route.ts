@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         path,
         database: hint,
         err: ping.message,
-        hint: "Prisma нужен Postgres URI (postgresql://…), из Supabase: Project Settings → Database — не URL/anon из «Connect» для JS SDK.",
+        hint: "Prisma нужен Postgres URI (postgresql://…). Supabase: шестерёнка Project settings внизу → Database → Connection string (pooler :6543); не путать с «Database» цилиндр → Settings, там URI нет.",
       });
       return NextResponse.json(
         {

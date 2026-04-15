@@ -4,8 +4,16 @@
 
 Это **не** Better Auth и **не** секрет сессии: сервер **не достучался до Postgres** по текущему `DATABASE_URL`.
 
+**Важно (Supabase UI):** экран **иконка «Database» (цилиндр) слева → Settings** — это **настройки движка** (размер пула, SSL, сброс пароля). Там **нет** готовой строки `postgresql://…`. Строку подключения с **pooler** бери так:
+
+1. **Внизу** левой колонки Supabase нажми **шестерёнку «Project settings»** (настройки всего проекта, не пункт Database вверху).
+2. В открывшемся окне слева выбери **Database** — там блок **Connection string** / вкладки **URI**, **Session pooler**, **Transaction** (порт **6543**, хост вида `*.pooler.supabase.com`).
+3. Либо на **главной странице проекта** (Overview) нажми **Connect** — в модалке те же URI.
+
+Дальше по шагам:
+
 1. **Supabase на паузе** (Free) — в [Supabase Dashboard](https://supabase.com/dashboard) открой проект → **Restore** / снимай паузу.
-2. **Прямой хост `db.<ref>.supabase.co:5432`** с **Vercel** часто даёт `P1001` (IPv6 / маршрутизация). Возьми строку из **Project Settings → Database → Connection string** в режиме **Session pooler** или **Transaction pooler** (порт **6543**, хост `*.pooler.supabase.com`) и подставь её в **`DATABASE_URL`** в Vercel для **Production** и **Preview**. См. [Connection pooler](https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler).
+2. **Прямой хост `db.<ref>.supabase.co:5432`** с **Vercel** часто даёт `P1001`. Скопируй **Session** или **Transaction pooler** URI (см. выше) и вставь в **`DATABASE_URL`** в Vercel (**Production** и **Preview**). См. [Connection pooler](https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler).
 3. После смены переменных — **Redeploy**. Миграции по-прежнему гоняй с машины или CI с доступом к БД (см. ниже).
 
 Локально полный `pnpm run build` включает **`prisma migrate deploy`**; на **Vercel** в [`vercel.json`](./vercel.json) используется **`pnpm run vercel-build`** (`prisma generate` + `next build` **без** миграций на билде). Переменные окружения задаёшь в **Vercel → Project → Settings → Environment Variables** (Production / Preview по желанию).
