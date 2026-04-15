@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { Link } from "@/i18n/navigation";
-import { formatAuthClientError } from "@/lib/format-auth-client-error";
+import { signUpEmailViaFetch } from "@/lib/register-api";
 import { internalEmailFromLogin, normalizeLogin } from "@/lib/username-login";
 
 import { Button } from "@/components/ui/button";
@@ -46,16 +45,17 @@ export function RegisterComponent() {
     setIsLoading(true);
     try {
       const email = internalEmailFromLogin(login);
-      const { error, data } = await authClient.signUp.email({
+      const origin = window.location.origin;
+      const result = await signUpEmailViaFetch({
+        origin,
         name: name.trim(),
         email,
         password,
         username: user,
       });
-      if (error) {
-        const detail = formatAuthClientError(error);
-        console.error("[register] signUp.email failed", error, { data, detail });
-        toast.error(detail);
+      if (!result.ok) {
+        console.error("[register] sign-up failed", result);
+        toast.error(result.userMessage);
         return;
       }
       toast.success("Аккаунт создан.");

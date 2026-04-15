@@ -47,6 +47,49 @@ export const auth = betterAuth({
   database: prismaAdapter(prismadb, { provider: "postgresql" }),
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: resolveBetterAuthBaseURL(),
+
+  onAPIError: {
+    onError(error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : "";
+      console.error("[better-auth] API error:", msg, stack?.slice(0, 2500));
+    },
+  },
+
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (createdUser) => {
+          const id =
+            createdUser && typeof createdUser === "object" && "id" in createdUser
+              ? String((createdUser as { id: string }).id)
+              : "";
+          if (!id) return;
+          try {
+            const count = await prismadb.users.count();
+            if (count === 1) {
+              await prismadb.users.update({
+                where: { id },
+                data: { role: "admin", userStatus: "ACTIVE" },
+              });
+            } else if (!isDemo) {
+              const dbUser = await prismadb.users.findUnique({ where: { id } });
+              if (dbUser) {
+                try {
+                  await newUserNotify(dbUser);
+                } catch {
+                  /* уведомление админам не должно ломать регистрацию */
+                }
+              }
+            }
+          } catch (e) {
+            console.error("[auth] databaseHooks.user.create.after:", e);
+          }
+        },
+      },
+    },
+  },
+
   advanced: {
     database: {
       generateId: "uuid",
@@ -104,27 +147,6 @@ export const auth = betterAuth({
       defaultRole: "member",
     }),
   ],
-
-  callbacks: {
-    async onUserCreated(user: { id: string }) {
-      const count = await prismadb.users.count();
-      if (count === 1) {
-        await prismadb.users.update({
-          where: { id: user.id },
-          data: { role: "admin", userStatus: "ACTIVE" },
-        });
-      } else if (!isDemo) {
-        const dbUser = await prismadb.users.findUnique({ where: { id: user.id } });
-        if (dbUser) {
-          try {
-            await newUserNotify(dbUser);
-          } catch {
-            /* уведомление админам не должно отменять создание пользователя */
-          }
-        }
-      }
-    },
-  },
 });
 
 export type Session = typeof auth.$Infer.Session;

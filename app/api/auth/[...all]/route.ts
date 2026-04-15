@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import {
   databaseUrlHint,
   pingDatabase,
@@ -64,12 +65,39 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       const text = await res.clone().text().catch(() => "");
       console.warn("[api/auth] POST", res.status, path, `${ms}ms`, "response:", text.slice(0, 1500));
+
+      // Better Auth при необработанной ошибке отдаёт HTML — клиент с fetch+JSON не видит причину.
+      if (
+        path.includes("sign-up/email") &&
+        (res.headers.get("content-type") || "").includes("text/html")
+      ) {
+        const snippet = text
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 800);
+        return NextResponse.json(
+          {
+            code: "SIGN_UP_SERVER_HTML_ERROR",
+            message:
+              snippet ||
+              `Сервер вернул HTML вместо JSON (${res.status}). Открой Vercel → Logs по метке [api/auth] или [better-auth].`,
+          },
+          { status: res.status }
+        );
+      }
     } else if (loud) {
       console.info("[api/auth] POST", res.status, path, `${ms}ms`);
     }
     return res;
   } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
     console.error("[api/auth] POST exception", { path, err: e });
-    throw e;
+    return NextResponse.json(
+      { code: "AUTH_ROUTE_UNCAUGHT", message: msg },
+      { status: 500 }
+    );
   }
 }
