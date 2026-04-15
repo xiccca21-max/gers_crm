@@ -23,7 +23,8 @@ function resolveBetterAuthSecret(): string {
   if (mustConfigure) {
     throw new Error(
       "BETTER_AUTH_SECRET: задай в Vercel → Settings → Environment Variables (Production) уникальную строку ≥32 символов " +
-        "(не плейсхолдер из vercel.json / примера). Сгенери: openssl rand -base64 48. Затем Redeploy. См. .env.gers.example."
+        "(не плейсхолдер из vercel.json / примера). Сгенери: node -e \"console.log(require('crypto').randomBytes(48).toString('base64'))\" " +
+        "или PowerShell: [Convert]::ToBase64String((1..48|%{Get-Random -Max 256})). Затем Redeploy. См. .env.gers.example."
     );
   }
   return `local-dev-better-auth-${"x".repeat(48)}`;
