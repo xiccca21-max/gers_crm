@@ -4,10 +4,14 @@
 
 ## 1. Подключение проекта
 
-1. [Vercel Dashboard](https://vercel.com/dashboard) → **Add New…** → **Project** → импорт репозитория с этим кодом.
+Репозиторий с форком: **https://github.com/xiccca21-max/gers-nextcrm** (приватный).
+
+1. [Vercel Dashboard](https://vercel.com/dashboard) → **Add New…** → **Project** → импорт **`xiccca21-max/gers-nextcrm`** (или подключи этот репозиторий к уже существующему проекту в **Settings → Git**).
 2. **Framework Preset:** Next.js (определится сам).
 3. **Root Directory:** корень репозитория (если монорепо — укажи подпапку с `package.json`).
-4. **Build Command** / **Install Command** уже заданы в [`vercel.json`](./vercel.json) (`pnpm install --frozen-lockfile`, `pnpm run build`). Node берётся из [`.nvmrc`](./.nvmrc) и `package.json` → **engines** (≥ 22.12).
+4. **Build Command** / **Install Command** уже заданы в [`vercel.json`](./vercel.json) (`pnpm install --frozen-lockfile`, `pnpm run build`). В **`package.json` → engines** указано `^22.12.0`, в `vercel.json` задан **`NODE_VERSION=22.x`**, чтобы Vercel не поднимал **Node 24** (у `canvas` часто нет пребилдов под новый ABI и падает `pnpm install`).
+
+**Без `DATABASE_URL` сборка не пройдёт:** `prisma generate` читает URL из [`prisma.config.ts`](./prisma.config.ts). Добавь `DATABASE_URL` в **Settings → Environment Variables** для **Production** и **Preview** и отметь **Expose to Build**, затем **Redeploy**.
 
 ## 2. Обязательные переменные (минимум для входа и CRM)
 

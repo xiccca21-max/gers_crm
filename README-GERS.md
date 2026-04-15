@@ -1,5 +1,7 @@
 # GERS fork (NextCRM)
 
+Репозиторий: **https://github.com/xiccca21-max/gers-nextcrm** (remote `gers`; `origin` — апстрим NextCRM).
+
 Внутренняя CRM на базе [NextCRM](https://github.com/pdovhomilja/nextcrm-app). Отличия от апстрима заданы флагом **`NEXT_PUBLIC_GERS_SLIM_UI`** (по умолчанию включён в `.env.example`).
 
 ## Быстрый старт «на веб» (Docker)
