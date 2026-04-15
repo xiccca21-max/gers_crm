@@ -43,7 +43,7 @@ docker compose logs -f app
 2. **Регистрация:** `/register` — имя, **логин** (латиница, цифры, `_`), пароль (не короче 8 символов). Почта не спрашивается; в БД сохраняется служебный адрес вида `{логин}@users.invalid` (валидный для Better Auth / Zod `z.email()`). Новые пользователи по умолчанию **PENDING**, пока админ не активирует.
 3. **Вход:** `/sign-in` — логин и пароль.
 
-**Resend** (`RESEND_API_KEY`, `EMAIL_FROM`) по-прежнему нужен для **уведомлений админам** о новых заявках на регистрацию (`newUserNotify`), не для кода входа.
+Уведомление админам о новой регистрации: `newUserNotify` → `lib/sendmail.ts` (**SMTP**: `EMAIL_HOST`, `EMAIL_USERNAME`, `EMAIL_PASSWORD`, плюс `EMAIL_FROM`). Пакет **resend** / `RESEND_API_KEY` в проекте — из апстрим-NextCRM (кампании, `lib/resend.ts`, Inngest), не эта ветка отправки для `newUserNotify`.
 
 ## 5. Заявки с сайта GERS
 
