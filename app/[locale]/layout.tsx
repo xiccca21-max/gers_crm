@@ -25,8 +25,9 @@ export async function generateMetadata(props: Props) {
 
   const t = await getTranslations({ locale, namespace: "RootLayout" });
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
+    metadataBase: new URL(appUrl),
     title: t("title"),
     description: t("description"),
     openGraph: {

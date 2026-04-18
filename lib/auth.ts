@@ -147,7 +147,8 @@ export const auth = betterAuth({
   },
 
   user: {
-    modelName: "Users",
+    /** Имя делегата Prisma (`prisma.users`), не PascalCase из schema.prisma — иначе @better-auth/prisma-adapter делает `prisma["Users"]` → undefined → 500 при регистрации. */
+    modelName: "users",
     fields: {
       createdAt: "created_on",
       updatedAt: "updated_at",
