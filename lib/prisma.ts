@@ -1,47 +1,37 @@
 import { PrismaClient } from "@prisma/client";
-import { normalizeServerlessPostgresUrl, preferIpv4FirstForDbConnections } from "@/lib/prisma-env";
+import type { Pool } from "pg";
+import { createPgPool, createPrismaWithAdapter, getNormalizedDatabaseUrl } from "@/lib/pg-prisma";
 
 declare global {
   var cachedPrisma: PrismaClient | undefined;
+  var cachedPgPool: Pool | undefined;
 }
 
-/**
- * Как в `geko/server/lib/prisma.ts`: классический движок Prisma без `@prisma/adapter-pg` / `pg.Pool`.
- * На Vercel+Supabase отдельный `pg`-адаптер часто ведёт себя иначе, чем встроенный клиент (как у рабочего Expo/Vercel-проекта).
- */
-const prismaClientSingleton = () => {
-  preferIpv4FirstForDbConnections();
-  const raw = process.env.DATABASE_URL?.trim();
-  // Prisma 7: `datasources` в конструкторе PrismaClient не в типах — нормализуем URL в env (как раньше по смыслу).
-  if (raw) {
-    process.env.DATABASE_URL = normalizeServerlessPostgresUrl(raw);
+const prismaClientSingleton = (): PrismaClient => {
+  if (global.cachedPrisma) {
+    return global.cachedPrisma;
   }
 
-  const client = new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  });
+  const connectionString = getNormalizedDatabaseUrl();
+  if (!global.cachedPgPool) {
+    global.cachedPgPool = createPgPool(connectionString);
+  }
+
+  global.cachedPrisma = createPrismaWithAdapter(global.cachedPgPool);
 
   if (process.env.NODE_ENV !== "production") {
     const cleanup = async () => {
-      await client.$disconnect();
+      await global.cachedPrisma?.$disconnect();
+      await global.cachedPgPool?.end();
+      global.cachedPgPool = undefined;
+      global.cachedPrisma = undefined;
     };
     process.on("beforeExit", cleanup);
     process.on("SIGINT", cleanup);
     process.on("SIGTERM", cleanup);
   }
 
-  return client;
+  return global.cachedPrisma;
 };
 
-let prisma: PrismaClient;
-
-if (process.env.NODE_ENV === "production") {
-  prisma = prismaClientSingleton();
-} else {
-  if (!global.cachedPrisma) {
-    global.cachedPrisma = prismaClientSingleton();
-  }
-  prisma = global.cachedPrisma;
-}
-
-export const prismadb = prisma;
+export const prismadb = prismaClientSingleton();

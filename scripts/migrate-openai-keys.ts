@@ -8,9 +8,11 @@
  * and run this script against a schema that still has both tables.
  * For new installations this is a no-op.
  */
-import { PrismaClient } from "@prisma/client";
+import { createPgPool, createPrismaWithAdapter, getNormalizedDatabaseUrl } from "../lib/pg-prisma";
 
-const prisma = new PrismaClient();
+const connectionString = getNormalizedDatabaseUrl();
+const pool = createPgPool(connectionString);
+const prisma = createPrismaWithAdapter(pool);
 
 async function main() {
   console.log("openAi_keys table was dropped in the Task 1 migration.");
@@ -22,4 +24,7 @@ async function main() {
 
 main()
   .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+  });

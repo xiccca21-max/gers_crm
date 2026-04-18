@@ -9,9 +9,11 @@
  *
  * Run: npx tsx scripts/migration/backfill-roles.ts
  */
-import { PrismaClient } from "@prisma/client";
+import { createPgPool, createPrismaWithAdapter, getNormalizedDatabaseUrl } from "../../lib/pg-prisma";
 
-const prisma = new PrismaClient();
+const connectionString = getNormalizedDatabaseUrl();
+const pool = createPgPool(connectionString);
+const prisma = createPrismaWithAdapter(pool);
 
 async function main() {
   console.log("Starting role backfill...");
@@ -39,4 +41,7 @@ main()
     console.error("Backfill failed:", e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+  });
