@@ -1,7 +1,19 @@
 import { createHash } from "crypto";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+
+/** Ленивая инициализация: при `next build` / Collecting page data ключ может отсутствовать — конструктор OpenAI не должен вызываться при импорте. */
+export function getOpenaiClient(): OpenAI {
+  if (!_openai) {
+    const key = process.env.OPENAI_API_KEY?.trim();
+    if (!key) {
+      throw new Error("OPENAI_API_KEY is not set");
+    }
+    _openai = new OpenAI({ apiKey: key });
+  }
+  return _openai;
+}
 
 /**
  * Concatenate non-null text fields into a single embedding string.
@@ -25,7 +37,7 @@ export function computeContentHash(text: string): string {
  * Returns a float array of 1536 dimensions.
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
+  const response = await getOpenaiClient().embeddings.create({
     model: "text-embedding-3-small",
     input: text,
   });

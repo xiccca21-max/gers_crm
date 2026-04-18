@@ -2,14 +2,12 @@ import { inngest } from "@/inngest/client";
 import { prismadb } from "@/lib/prisma";
 import {
   generateEmbedding,
+  getOpenaiClient,
   toVectorLiteral,
   computeContentHash,
 } from "@/inngest/lib/embedding-utils";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getMinioBucket, minioClient } from "@/lib/minio";
-import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const CHUNK_SIZE = 512; // tokens (approx 4 chars per token)
 const CHUNK_OVERLAP = 50;
@@ -171,7 +169,7 @@ export const enrichDocument = inngest.createFunction(
     // Step 3: Generate summary
     const summary = await step.run("generate-summary", async () => {
       const truncated = contentText.slice(0, 12000); // ~3000 tokens for summary input
-      const response = await openai.chat.completions.create({
+      const response = await getOpenaiClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
@@ -194,7 +192,7 @@ export const enrichDocument = inngest.createFunction(
     // Step 4: AI classification
     await step.run("ai-classify", async () => {
       const truncated = contentText.slice(0, 4000);
-      const response = await openai.chat.completions.create({
+      const response = await getOpenaiClient().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
